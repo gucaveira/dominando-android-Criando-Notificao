@@ -12,6 +12,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.TaskStackBuilder
 
 object NotificationUtils {
     private const val CHANNEL_ID = "default"
@@ -39,11 +40,14 @@ object NotificationUtils {
     }
 
     private fun getContentIntent(context: Context): PendingIntent? {
-        val intent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        val detailsIntent = Intent(context, DetailActivity::class.java).apply {
+            putExtra(DetailActivity.EXTRA_MESSAGE, "Via notificação")
         }
-        return PendingIntent.getActivity(context, 0, intent,
-            PendingIntent.FLAG_IMMUTABLE)
+        // usar isso é bem util, focar em memorizar
+        return TaskStackBuilder
+            .create(context)
+            .addNextIntentWithParentStack(detailsIntent)
+            .getPendingIntent(1, PendingIntent.FLAG_IMMUTABLE)
     }
 
     fun notificationSimple(context: Context) {

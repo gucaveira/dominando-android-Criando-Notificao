@@ -13,4 +13,5 @@
     <string name="notif_big_inbox_title">Mensagens não lidas:</string>
     <string name="notif_big_inbox_message">Mensagem %1$d</string>
     <string name="notif_big_inbox_summary">Clique para exibir</string>
+    <string name="title_activity_detail">Detail activity</string>
 </resources>
