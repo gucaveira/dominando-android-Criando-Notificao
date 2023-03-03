@@ -162,7 +162,12 @@ object NotificationUtils {
         }
 
         val replyPendingIntent = PendingIntent
-            .getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE)
+            .getBroadcast(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+            )
 
         // pacote androidx.core.app
         val remoteInput = RemoteInput
@@ -218,8 +223,33 @@ object NotificationUtils {
         }
     }
 
-    fun notificationInbox(mainActivity: MainActivity) {
-        TODO("Not yet implemented")
+    fun notificationInbox(context: Context) {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNotificationChannel(context)
+        }
+
+        val number = 5
+
+        val inboxStyle = NotificationCompat.InboxStyle()
+        inboxStyle.setBigContentTitle(context.getString(R.string.notif_big_inbox_title))
+
+        for (i in 1..number) {
+            inboxStyle.addLine(context.getString(R.string.notif_big_inbox_message, i))
+        }
+
+        inboxStyle.setSummaryText(context.getString(R.string.notif_big_inbox_summary))
+
+        val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_favorite)
+            .setColor(ActivityCompat.getColor(context, R.color.purple_200))
+            .setContentTitle(context.getString(R.string.notif_title))
+            .setContentText(context.getString(R.string.notif_text))
+            .setDefaults(Notification.DEFAULT_ALL).setNumber(number)
+            .setStyle(inboxStyle)
+
+        val nm = NotificationManagerCompat.from(context)
+        nm.notify(8, notificationBuilder.build())
     }
 
     fun notificationHeadsUp(mainActivity: MainActivity) {
