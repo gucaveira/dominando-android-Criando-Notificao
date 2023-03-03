@@ -112,8 +112,36 @@ object NotificationUtils {
         notificationManager.notify(3, notificationBuilder.build())
     }
 
-    fun notificationWithButtonAction(mainActivity: MainActivity) {
-        TODO("Not yet implemented")
+    fun notificationWithButtonAction(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNotificationChannel(context)
+        }
+
+        val actionIntent = Intent(context, NotificationActionReceiver::class.java).apply {
+            putExtra(NotificationActionReceiver.EXTRA_MESSAGE, "Ação da notificação")
+        }
+
+        val pendingIntent = PendingIntent
+            .getBroadcast(
+                context,
+                0,
+                actionIntent,
+                PendingIntent.FLAG_IMMUTABLE
+            )
+
+        val notificationBuilder = NotificationCompat
+            .Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_favorite)
+            .setContentTitle(context.getString(R.string.notif_title))
+            .setContentText(context.getString(R.string.notif_text))
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setColor(ActivityCompat.getColor(context, R.color.purple_200))
+            .setDefaults(Notification.DEFAULT_ALL)
+            .addAction(0, context.getString(R.string.notif_button_action), pendingIntent)
+            .setAutoCancel(true)
+
+        val notificationManager = NotificationManagerCompat.from(context)
+        notificationManager.notify(4, notificationBuilder.build())
     }
 
     fun notificationAutoReply(mainActivity: MainActivity) {
