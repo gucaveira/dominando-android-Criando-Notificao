@@ -89,8 +89,27 @@ object NotificationUtils {
         notificationManager.notify(2, notificationBuilder.build())
     }
 
-    fun notificationBigText(mainActivity: MainActivity) {
-        TODO("Not yet implemented")
+    fun notificationBigText(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNotificationChannel(context)
+        }
+
+        val bigTextStyle = NotificationCompat.BigTextStyle()
+            .bigText(context.getString(R.string.notif_big_message))
+
+        val notificationBuilder = NotificationCompat
+            .Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_favorite)
+            .setContentTitle(context.getString(R.string.notif_title))
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setColor(ActivityCompat.getColor(context, R.color.purple_200))
+            .setDefaults(Notification.DEFAULT_ALL)
+            .setContentIntent(getContentIntent(context))
+            .setAutoCancel(true)
+            .setStyle(bigTextStyle)
+
+        val notificationManager = NotificationManagerCompat.from(context)
+        notificationManager.notify(3, notificationBuilder.build())
     }
 
     fun notificationWithButtonAction(mainActivity: MainActivity) {
