@@ -1,5 +1,6 @@
 package dominando.android.notification
 
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -8,12 +9,17 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.RemoteInput
 import androidx.core.app.TaskStackBuilder
+import androidx.core.content.ContextCompat
 
+@SuppressLint("MissingPermission")
 object NotificationUtils {
     private const val CHANNEL_ID = "default"
 
@@ -144,8 +150,72 @@ object NotificationUtils {
         notificationManager.notify(4, notificationBuilder.build())
     }
 
-    fun notificationAutoReply(mainActivity: MainActivity) {
-        TODO("Not yet implemented")
+    @SuppressLint("UnspecifiedImmutableFlag")
+    fun notificationAutoReply(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNotificationChannel(context)
+        }
+
+        val notificationId = 5
+        val intent = Intent(context, ReplyReceiver::class.java).apply {
+            putExtra(ReplyReceiver.EXTRA_NOTIFICATION_ID, notificationId)
+        }
+
+        val replyPendingIntent = PendingIntent
+            .getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE)
+
+        // pacote androidx.core.app
+        val remoteInput = RemoteInput
+            .Builder(ReplyReceiver.EXTRA_TEXT_REPLY)
+            .setLabel(context.getString(R.string.notif_reply_hint))
+            .build()
+
+        val action = NotificationCompat.Action
+            .Builder(
+                R.drawable.ic_send,
+                context.getString(R.string.notif_reply_label),
+                replyPendingIntent
+            ).addRemoteInput(remoteInput).build()
+
+        val notificationBuilder = NotificationCompat
+            .Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_favorite)
+            .setContentTitle(context.getString(R.string.notif_title))
+            .setContentText(context.getString(R.string.notif_text))
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setColor(ActivityCompat.getColor(context, R.color.purple_200))
+            .setDefaults(Notification.DEFAULT_ALL)
+            .addAction(action)
+
+        val notificationManager = NotificationManagerCompat.from(context)
+
+        notificationManager.notify(notificationId, notificationBuilder.build())
+    }
+
+    fun notificationReplied(context: Context, notificationId: Int) {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNotificationChannel(context)
+        }
+
+        val timeout = 2000L
+
+        val notificationBuilder = NotificationCompat
+            .Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_favorite)
+            .setContentTitle(context.getString(R.string.notif_title))
+            .setContentText(context.getString(R.string.notif_reply_replied))
+            .setColor(ContextCompat.getColor(context, R.color.purple_200))
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT).setDefaults(0)
+            .setTimeoutAfter(timeout)
+
+        val notificationManager = NotificationManagerCompat.from(context)
+        notificationManager.notify(notificationId, notificationBuilder.build())
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            Handler(Looper.getMainLooper())
+                .postDelayed({ notificationManager.cancel(notificationId) }, timeout)
+        }
     }
 
     fun notificationInbox(mainActivity: MainActivity) {
