@@ -61,8 +61,17 @@ object NotificationUtils {
             createNotificationChannel(context)
         }
 
+        val deletePit = PendingIntent
+            .getBroadcast(
+                context,
+                0,
+                Intent(context, DeleteNotificationReceiver::class.java),
+                PendingIntent.FLAG_IMMUTABLE
+            )
+
         val notificationBuilder = NotificationCompat
             .Builder(context, CHANNEL_ID)
+            .setDeleteIntent(deletePit)
             .setSmallIcon(R.drawable.ic_favorite)
             .setContentTitle(context.getString(R.string.notif_title))
             .setContentText(context.getString(R.string.notif_text))
