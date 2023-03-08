@@ -22,6 +22,7 @@ import androidx.core.content.ContextCompat
 @SuppressLint("MissingPermission")
 object NotificationUtils {
     private const val CHANNEL_ID = "default"
+    private const val URGENT_ID = "urgent"
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createNotificationChannel(context: Context) {
@@ -261,7 +262,37 @@ object NotificationUtils {
         nm.notify(8, notificationBuilder.build())
     }
 
-    fun notificationHeadsUp(mainActivity: MainActivity) {
-        TODO("Not yet implemented")
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createNotificationUrgentChannel(context: Context) {
+
+        val channel = NotificationChannel(
+            URGENT_ID,
+            context.getString(R.string.notif_channel_urgent_name),
+            NotificationManager.IMPORTANCE_HIGH
+        )
+
+        NotificationManagerCompat.from(context).apply {
+            createNotificationChannel(channel)
+        }
+    }
+
+    fun notificationHeadsUp(context: Context) {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNotificationUrgentChannel(context)
+        }
+
+        val notificationBuilder = NotificationCompat
+            .Builder(context, URGENT_ID)
+            .setSmallIcon(R.drawable.ic_favorite)
+            .setContentTitle(context.getString(R.string.notif_title))
+            .setContentText(context.getString(R.string.notif_text))
+            .setColor(ActivityCompat.getColor(context, R.color.purple_200))
+            .setDefaults(Notification.DEFAULT_ALL)
+            .setAutoCancel(true)
+            .setFullScreenIntent(getContentIntent(context), true)
+
+        val notificationManager = NotificationManagerCompat.from(context)
+        notificationManager.notify(1, notificationBuilder.build())
     }
 }
